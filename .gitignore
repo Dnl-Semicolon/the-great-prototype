@@ -1,0 +1,28 @@
+# Ignore IDE-specific files
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+*.class
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# MacOS-specific files
+.DS_Store
+
+# Windows-specific files
+Thumbs.db
+ehthumbs.db
+
+# Ignore logs and temp files
+*.log
+*.tmp
+*.swp
