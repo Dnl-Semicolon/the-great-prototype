@@ -97,11 +97,6 @@ public class ReservationManager {
         waitlist.remove(position);
     }
 
-    public void addCustomer() {
-        Customer newCustomer = reservationManagerUI.inputCustomerDetails1();
-        waitlist.add(newCustomer);
-    }
-
     public String getWaitlist() {
         StringBuilder outputStr = new StringBuilder();
         if (waitlist.isEmpty()) {

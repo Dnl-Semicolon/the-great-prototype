@@ -19,24 +19,6 @@ public class ReservationManagerUI {
         return choice;
     }
 
-    public Customer inputCustomerDetails1() {
-        Customer newCustomer = new Customer();
-        System.out.println("Add New Customer");
-        System.out.print("Enter customer name: ");
-        String name = scanner.nextLine();
-        System.out.println();
-        System.out.print("Enter contact number: ");
-        String phoneNo = scanner.nextLine();
-        System.out.println();
-        System.out.print("Enter party size: ");
-        int partySize = scanner.nextInt();
-        scanner.nextLine();
-        System.out.println();
-        newCustomer = new Customer(name, partySize, phoneNo);
-        System.out.println("New Customer Added To Waitlist.\n");
-        return newCustomer;
-    }
-
     public void displayWaitlist(String inputStr) {
         System.out.println("Waitlist");
         System.out.println("****************************************************");
