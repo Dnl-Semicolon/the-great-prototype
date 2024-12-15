@@ -1,8 +1,9 @@
 package entity;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Reservation {
+public class Reservation implements Serializable {
     private LocalDateTime reservationDateTime;
     private String lastName;
     private int partySize;
@@ -63,5 +64,16 @@ public class Reservation {
     public boolean isTimeToReserve() {
         LocalDateTime now = LocalDateTime.now();
         return now.isAfter(reservationDateTime.minusHours(1)) && now.isBefore(reservationDateTime);
+    }
+
+    @Override
+    public String toString() {
+        return "Reservation{" +
+                "reservationDateTime=" + reservationDateTime +
+                ", lastName='" + lastName + '\'' +
+                ", partySize=" + partySize +
+                ", contactNumber='" + contactNumber + '\'' +
+                ", reservedTableNumber=" + reservedTableNumber +
+                '}';
     }
 }

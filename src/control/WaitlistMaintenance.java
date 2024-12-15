@@ -40,7 +40,6 @@ public class WaitlistMaintenance {
     }
 
     public void addCustomerToWaitlist() {
-        waitlistMaintenanceUI.displayFormHeader();
         String customerName = "";
         int customerPartySize = 0;
         String customerContactNumber = "";

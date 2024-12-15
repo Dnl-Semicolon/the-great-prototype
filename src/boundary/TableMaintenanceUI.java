@@ -25,6 +25,7 @@ public class TableMaintenanceUI {
                 System.out.println("2. Display All Tables");
                 System.out.println("3. Search Table");
                 System.out.println("4. Delete Table");
+                System.out.println("5. Exit");
                 System.out.print("Enter Your Choice >> ");
                 choice = scanner.nextInt();
                 isExceptionFound = false;
