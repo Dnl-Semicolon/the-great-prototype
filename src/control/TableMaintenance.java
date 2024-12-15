@@ -16,7 +16,40 @@ public class TableMaintenance {
         tables = tableDAO.retrieveFromFile();
     }
 
-    private void addTable() {
+    public void displayAllTables() {
+        if (!tables.isEmpty()) {
+            tableMaintenanceUI.displayAllTables(getAllTables());
+        } else {
+            tableMaintenanceUI.displayNoTablesMessage();
+        }
+    }
+
+    public String getAllTables() {
+        StringBuilder inputStr = new StringBuilder();
+        Table tableEntry;
+        int n = tables.getNumberOfEntries();
+        for (int i = 1; i <= n; i++) {
+            tableEntry = tables.getEntry(i);
+            inputStr.append(String.format("%3d.   ", i));
+            inputStr.append(tableEntry.toString());
+            inputStr.append("\n");
+        }
+        return inputStr.toString();
+    }
+
+    public void addTable() {
+        int tableNoInput = 0;
+        boolean isValidInput = false;
+        while (!isValidInput) {
+            tableNoInput = tableMaintenanceUI.inputNewTableNumber();
+            if (Table.isValidTableNumber(tableNoInput)) {
+                isValidInput = true;
+            }
+        }
+        Table newTable = new Table(tableNoInput);
+        tables.add(newTable);
+        tableDAO.saveToFile(tables);
+        displayAllTables();
     }
 
     public void runTableMaintenance() {
@@ -27,6 +60,8 @@ public class TableMaintenance {
             switch (choice) {
                 case 1:
                     addTable();
+                case 2:
+                    displayAllTables();
                     break;
             }
         } while (choice != 0);
