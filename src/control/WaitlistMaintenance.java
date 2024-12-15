@@ -5,6 +5,7 @@ import adt.ListInterface;
 import boundary.WaitlistMaintenanceUI;
 import dao.WaitlistDAO;
 import entity.Customer;
+import entity.MenuItem;
 
 public class WaitlistMaintenance {
     private WaitlistMaintenanceUI waitlistMaintenanceUI;
@@ -14,7 +15,7 @@ public class WaitlistMaintenance {
     public WaitlistMaintenance() {
         waitlistMaintenanceUI = new WaitlistMaintenanceUI();
         waitlistDAO = new WaitlistDAO();
-
+        waitlist = waitlistDAO.retrieveFromFile();
     }
 
     public void displayWaitlist() {
@@ -39,7 +40,47 @@ public class WaitlistMaintenance {
     }
 
     public void addCustomerToWaitlist() {
-        //TODO
+        waitlistMaintenanceUI.displayFormHeader();
+        String customerName = "";
+        int customerPartySize = 0;
+        String customerContactNumber = "";
+        Customer newCustomer = new Customer();
+
+        boolean isValidInput = false;
+
+        while (!isValidInput) {
+            customerName = waitlistMaintenanceUI.inputCustomerName();
+            if (Customer.isValidName(customerName)) {
+                isValidInput = true;
+            }
+        }
+
+        isValidInput = false;
+
+        while (!isValidInput) {
+            customerPartySize = waitlistMaintenanceUI.inputCustomerPartySize();
+            if (Customer.isValidPartySize(customerPartySize)) {
+                isValidInput = true;
+            }
+        }
+
+        isValidInput = false;
+
+        while (!isValidInput) {
+            customerContactNumber = waitlistMaintenanceUI.inputCustomerContactNumber();
+            if (Customer.isValidContactNumber(customerContactNumber)) {
+                isValidInput = true;
+            }
+        }
+
+        newCustomer.setName(customerName);
+        newCustomer.setPartySize(customerPartySize);
+        newCustomer.setPhoneNumber(customerContactNumber);
+
+        waitlist.add(newCustomer);
+        waitlistDAO.saveToFile(waitlist);
+
+        displayWaitlist();
     }
 
     public void runWaitlistMaintenance() {

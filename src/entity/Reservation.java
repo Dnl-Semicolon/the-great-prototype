@@ -59,4 +59,9 @@ public class Reservation {
     public void setReservedTableNumber(int reservedTableNumber) {
         this.reservedTableNumber = reservedTableNumber;
     }
+
+    public boolean isTimeToReserve() {
+        LocalDateTime now = LocalDateTime.now();
+        return now.isAfter(reservationDateTime.minusHours(1)) && now.isBefore(reservationDateTime);
+    }
 }

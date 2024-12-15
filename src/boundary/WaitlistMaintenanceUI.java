@@ -44,6 +44,58 @@ public class WaitlistMaintenanceUI {
 
     public void displayWaitlist(String waitlist) {
         System.out.println("Waitlist");
+        System.out.println("Entry  Name            Guests       Phone Number");
         System.out.println(waitlist);
+    }
+
+    public void displayFormHeader() {
+        System.out.println("+-------------------------+");
+        System.out.println("|  Type customer details  |");
+        System.out.println("| according to the prompt |");
+        System.out.println("|     and press <Enter>   |");
+        System.out.println("+-------------------------+");
+        System.out.println();
+        System.out.println("--- Add Customer to Waitlist Form ---");
+    }
+
+    public String inputCustomerName() {
+        String name = "";
+        System.out.println("Name:");
+        System.out.print(">> ");
+        name = scanner.nextLine();
+        System.out.println();
+        return name;
+    }
+
+    public int inputCustomerPartySize() {
+        int partySize = 0;
+        boolean isExceptionFound = false;
+        do {
+            try {
+                System.out.println("Guests (Pax)");
+                System.out.print(">> ");
+                partySize = scanner.nextInt();
+                isExceptionFound = false;
+            } catch (Exception ex) {
+                scanner.nextLine();
+                partySize = 0;
+                isExceptionFound = true;
+                System.out.println();
+                System.out.println("Error: Not A Valid Party Size. Enter A Whole Number As A Party Size.");
+                System.out.println();
+            }
+        } while (isExceptionFound);
+        scanner.nextLine();
+        System.out.println();
+        return partySize;
+    }
+
+    public String inputCustomerContactNumber() {
+        String contactNumber = "";
+        System.out.println("Contact Number:");
+        System.out.print(">> ");
+        contactNumber = scanner.nextLine();
+        System.out.println();
+        return contactNumber;
     }
 }
