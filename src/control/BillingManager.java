@@ -6,8 +6,7 @@ import adt.ListInterface;
 import boundary.BillingManagerUI;
 import boundary.ReceiptUI;
 import dao.BillDAO;
-import entity.Bill;
-
+import entity.*;
 import java.time.LocalTime;
 import java.util.Scanner;
 
@@ -101,8 +100,8 @@ public class BillingManager {
      
     public double calculateSubTotal(){
         double subtotal = 0.0;
-        for(int i = 0; i < itemsList.size();i ++){
-            Bill item = itemsList.get(i);
+        for(int i = 1; i <= itemsList.getNumberOfEntries();i ++){
+            Bill item = itemsList.getEntry(i);
             subtotal += item.getPrice() * item.getQuantity();
         }
         return subtotal;
