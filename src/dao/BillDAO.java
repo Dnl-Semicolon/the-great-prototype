@@ -2,7 +2,7 @@ package dao;
 
 import adt.ArrayList;
 import adt.ListInterface;
-import entity.Bill;
+import entity.*;
 
 import java.io.*;
 

@@ -1,7 +1,8 @@
 package boundary;
 
 import adt.ListInterface;
-import entity.Bill;
+import dao.*;
+import entity.*;
 
 /**
  *
@@ -30,8 +31,8 @@ public class ReceiptUI {
         
         ListInterface<Bill> items = billDAO.readBill();
         int num = 0;
-        for (int i = 0; i < items.size(); i ++){
-            Bill item = items.get(i);
+        for (int i = 1; i <= items.getNumberOfEntries(); i ++){
+            Bill item = items.getEntry(i);
             num++;
             System.out.printf("%-3s %-22s %-11d RM%6.2f%n", num + ".", item.getItem(), item.getQuantity(), item.getPrice());
 

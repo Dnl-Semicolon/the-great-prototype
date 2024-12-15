@@ -1,18 +1,20 @@
 package dao;
 
-import adt.*;
-import entity.*;
+import adt.ArrayList;
+import adt.ListInterface;
+import entity.Customer;
+import entity.MenuItem;
 
 import java.io.*;
 
-public class TableDAO {
-    private String fileName = "tables.dat";
+public class WaitlistDAO {
+    private String fileName = "waitlist.dat";
 
-    public void saveToFile(ListInterface<Table> tableList) {
+    public void saveToFile(ListInterface<Customer> waitList) {
         File file = new File(fileName);
         try {
             ObjectOutputStream ooStream = new ObjectOutputStream(new FileOutputStream(file));
-            ooStream.writeObject(tableList);
+            ooStream.writeObject(waitList);
             ooStream.close();
         } catch (FileNotFoundException ex) {
             System.out.println("\nFile not found");
@@ -21,12 +23,12 @@ public class TableDAO {
         }
     }
 
-    public ListInterface<Table> retrieveFromFile() {
+    public ListInterface<Customer> retrieveFromFile() {
         File file = new File(fileName);
-        ListInterface<Table> tableList = new ArrayList<>();
+        ListInterface<Customer> waitList = new ArrayList<>();
         try {
             ObjectInputStream oiStream = new ObjectInputStream(new FileInputStream(file));
-            tableList = (ArrayList<Table>) (oiStream.readObject());
+            waitList = (ArrayList<Customer>) (oiStream.readObject());
             oiStream.close();
         } catch (FileNotFoundException ex) {
             System.out.println("\nNo such file.");
@@ -35,17 +37,7 @@ public class TableDAO {
         } catch (ClassNotFoundException ex) {
             System.out.println("\nClass not found.");
         } finally {
-            return tableList;
+            return waitList;
         }
     }
-
-    public ListInterface<Table> initTables() {
-        ListInterface<Table> tableList = new ArrayList<>();
-        tableList.add(new Table(1));
-        tableList.add(new Table(2));
-        tableList.add(new Table(3));
-        return tableList;
-    }
-
-
 }
