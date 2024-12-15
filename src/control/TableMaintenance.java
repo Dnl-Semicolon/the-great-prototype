@@ -63,8 +63,18 @@ public class TableMaintenance {
                 case 2:
                     displayAllTables();
                     break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    System.out.println("Exiting system");
+                    System.out.println();
+                    break;
+                default:
+
             }
-        } while (choice != 0);
+        } while (choice != 5);
     }
 
     public static void main(String[] args) {
