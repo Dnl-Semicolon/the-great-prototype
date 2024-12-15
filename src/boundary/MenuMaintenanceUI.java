@@ -24,6 +24,7 @@ public class MenuMaintenanceUI {
 				System.out.println("2. Display Menu Items");
 				System.out.println("3. Search Menu Item");
 				System.out.println("4. Delete Menu Item");
+				System.out.println("5. Exit");
 				System.out.print("Enter Your Choice >> ");
 				choice = scanner.nextInt();
 				isExceptionFound = false;

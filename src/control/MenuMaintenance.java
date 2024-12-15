@@ -216,11 +216,15 @@ public class MenuMaintenance {
 				case 4:
 					deleteMenuItem();
 					break;
+				case 5:
+					System.out.println("Exiting System...");
+					System.out.println();
+					break;
 				default:
-					System.out.println("Error: Not A Valid Choice. Enter A Choice Within 1-4.");
+					System.out.println("Error: Not A Valid Choice. Enter A Choice Within 1-5.");
 					System.out.println();
 			}
-		} while (choice != 0);
+		} while (choice != 5);
 	}
 
 
