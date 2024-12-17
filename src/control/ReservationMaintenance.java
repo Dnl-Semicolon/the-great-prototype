@@ -5,10 +5,13 @@ import adt.ListInterface;
 import boundary.ReservationMaintenanceUI;
 import dao.ReservationDAO;
 import entity.Reservation;
+import entity.Table;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Scanner;
 
 public class ReservationMaintenance {
     private ReservationMaintenanceUI reservationMaintenanceUI;
@@ -17,11 +20,13 @@ public class ReservationMaintenance {
     private static final String OPENING_TIME = "10:00 AM";
     private static final String CLOSING_TIME = "10:00 PM";
     private static final int TIME_INTERVAL = 30; // In minutes
+    private TableMaintenance tableMaintenance;
 
     public ReservationMaintenance() {
         reservationMaintenanceUI = new ReservationMaintenanceUI();
         reservationDAO = new ReservationDAO();
-        reservationList = reservationDAO.retrieveFromFile();
+//        reservationList = reservationDAO.retrieveFromFile();
+        tableMaintenance = new TableMaintenance();
     }
 
     public void timelineView() {
@@ -63,6 +68,70 @@ public class ReservationMaintenance {
         return "";
     }
 
+    public void makeReservation() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Customer Name: ");
+        String name = scanner.nextLine();
+
+        System.out.print("Enter Phone Number: ");
+        String phone = scanner.nextLine();
+
+        System.out.print("Enter Number of Guests: ");
+        int partySize = scanner.nextInt();
+        scanner.nextLine();
+
+        ListInterface<Table> tables = tableMaintenance.getListOfTables();
+
+        if (tables.isEmpty()) {
+            System.out.println("Sorry, no tables available for your party size.");
+            return;
+        }
+        Table availableTable;
+        System.out.println("\nAvailable Tables:");
+        for (int i = 1; i <= tables.getNumberOfEntries(); i++) {
+            availableTable = tables.getEntry(i);
+            System.out.printf("Table %d (Capacity: %d)\n",
+                    availableTable.getTableNo(), availableTable.getCapacity());
+        }
+
+        System.out.print("\nEnter Reservation Date and Time (YYYY-MM-DD HH:mm): ");
+        String dateTimeStr = scanner.nextLine();
+        LocalDateTime reservationTime;
+        try {
+            reservationTime = LocalDateTime.parse(dateTimeStr,
+                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+        } catch (Exception e) {
+            System.out.println("Invalid date format. Reservation cancelled.");
+            return;
+        }
+
+        // Select a table
+        System.out.print("Enter Table Number: ");
+        int tableNumber = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        Table selectedTable = null;
+        boolean found = false;
+        int n = tables.getNumberOfEntries();
+        for (int i = 1; i <= n && !found; i++) {
+            selectedTable = tables.getEntry(i);
+            if (selectedTable.getTableNo() == tableNumber) {
+                found = true;
+            }
+        }
+
+        if (!found) {
+            selectedTable = null;
+        }
+
+        if (selectedTable == null) {
+            System.out.println("Invalid table selection. Reservation cancelled.");
+            return;
+        }
+
+
+    }
+
     public void addReservation() {
         String dateInput = "";
         String timeInput = "";
@@ -93,7 +162,7 @@ public class ReservationMaintenance {
             choice = reservationMaintenanceUI.getMainMenuChoice();
             switch (choice) {
                 case 1:
-                    addReservation();
+                    makeReservation();
                     break;
                 case 2:
                     displayReservations();
@@ -104,8 +173,6 @@ public class ReservationMaintenance {
                 case 4:
                     break;
                 case 5:
-                    break;
-                case 6:
                     System.out.println("Exiting system");
                     System.out.println();
                     break;

@@ -22,11 +22,15 @@ public class ReservationMaintenanceUI {
                 System.out.println("--- Reservation Management ---");
                 System.out.println("1. Make a Reservation");
                 System.out.println("2. View Reservations");
-                System.out.println("3. Timeline View (Table Availability)");
-                System.out.println("4. Update Reservation");
-                System.out.println("5. Cancel Reservation");
-                System.out.println("6. Exit");
-                System.out.print("Enter Your Choice (1-6) >> ");
+                System.out.println("3. Modify Reservation");
+                System.out.println("4. Cancel Reservation");
+                System.out.println("5. Exit");
+                //1. Make a Reservation
+                //2. View Reservations
+                //3. Modify Reservation
+                //4. Cancel Reservation
+                //5. Exit
+                System.out.print("Enter Your Choice (1-5) >> ");
                 choice = scanner.nextInt();
                 isExceptionFound = false;
             } catch (Exception ex) {
