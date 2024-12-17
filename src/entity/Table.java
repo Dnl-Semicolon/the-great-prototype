@@ -84,6 +84,10 @@ public class Table implements Serializable {
         inputStr.append(strFormat);
         return inputStr.toString();
     }
+
+    public int getCapacity() {
+        return 4;
+    }
     //+--------+----------+------------+----------------------------+
     //| Entry  | Table    | Status     | Remarks                    |
     //+--------+----------+------------+----------------------------+
