@@ -44,7 +44,7 @@ public class OrderManager {
             orderManagerUI.displayMenu(getMenu());
             int menuItemChoice = orderManagerUI.getMenuItemChoice();
             MenuItem chosenMenuItem = menu.getEntry(menuItemChoice);
-            newOrder.orderItems.add(chosenMenuItem);
+//            newOrder.orderItems.add(chosenMenuItem);
             addingItems = orderManagerUI.confirmAddAnotherItem(chosenMenuItem);
         }
         orderManagerUI.displayOrderCreationComplete(tableNumber);

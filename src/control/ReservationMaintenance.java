@@ -14,11 +14,41 @@ public class ReservationMaintenance {
     private ReservationMaintenanceUI reservationMaintenanceUI;
     private ReservationDAO reservationDAO;
     private ListInterface<Reservation> reservationList = new ArrayList<>();
+    private static final String OPENING_TIME = "10:00 AM";
+    private static final String CLOSING_TIME = "10:00 PM";
+    private static final int TIME_INTERVAL = 30; // In minutes
 
     public ReservationMaintenance() {
         reservationMaintenanceUI = new ReservationMaintenanceUI();
         reservationDAO = new ReservationDAO();
         reservationList = reservationDAO.retrieveFromFile();
+    }
+
+    public void timelineView() {
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
+        LocalTime openingTime = LocalTime.parse(OPENING_TIME, timeFormatter);
+        LocalTime closingTime = LocalTime.parse(CLOSING_TIME, timeFormatter);
+
+        ListInterface<String> timeSlots = new ArrayList<>();
+        LocalTime currentTime = openingTime;
+
+        while (!currentTime.isAfter(closingTime)) {
+            timeSlots.add(currentTime.format(timeFormatter));
+            currentTime = currentTime.plusMinutes(TIME_INTERVAL);
+        }
+
+        StringBuilder table = new StringBuilder();
+        table.append("Table   | ");
+        String slot;
+        int n = timeSlots.getNumberOfEntries();
+        for (int i = 1; i <= n; i++) {
+            slot = timeSlots.getEntry(i);
+            table.append(String.format("%-9s| ", slot));
+        }
+        table.append("\n");
+        table.append("-".repeat(9 + (n * 11))).append("\n");
+
+        reservationMaintenanceUI.timelineView(table.toString());
     }
 
     public void displayReservations() {
@@ -35,6 +65,7 @@ public class ReservationMaintenance {
 
     public void addReservation() {
         String dateInput = "";
+        String timeInput = "";
 
         boolean isValidInput = false;
         while (!isValidInput) {
@@ -43,6 +74,16 @@ public class ReservationMaintenance {
                 isValidInput = true;
             }
         }
+
+        isValidInput = false;
+        while (!isValidInput) {
+            timeInput = reservationMaintenanceUI.inputReservationTime();
+            if (isValidReservationTime(timeInput)) {
+                isValidInput = true;
+            }
+        }
+
+        System.out.println("Available Tables for 20/12/2024 at 18:30:");
 
     }
 
@@ -58,10 +99,13 @@ public class ReservationMaintenance {
                     displayReservations();
                     break;
                 case 3:
+                    timelineView();
                     break;
                 case 4:
                     break;
                 case 5:
+                    break;
+                case 6:
                     System.out.println("Exiting system");
                     System.out.println();
                     break;

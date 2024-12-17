@@ -16,6 +16,10 @@ public class TableMaintenance {
         tables = tableDAO.retrieveFromFile();
     }
 
+    public ListInterface<Table> getListOfTables() {
+        return tables;
+    }
+
     public void displayAllTables() {
         if (!tables.isEmpty()) {
             tableMaintenanceUI.displayAllTables(getAllTables());
@@ -60,6 +64,7 @@ public class TableMaintenance {
             switch (choice) {
                 case 1:
                     addTable();
+                    break;
                 case 2:
                     displayAllTables();
                     break;

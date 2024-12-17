@@ -18,6 +18,10 @@ public class MenuMaintenance {
 		menu = menuDAO.retrieveFromFile();
 	}
 
+	public ListInterface<MenuItem> getMenuList() {
+		return menu;
+	}
+
 	public void deleteMenuItem() {
 		MenuItem menuItemToDelete = new MenuItem();
 		boolean isMenuItemToDeleteFound = false;
@@ -141,6 +145,14 @@ public class MenuMaintenance {
 		} else {
 			menuMaintenanceUI.displayEmptyMenuMessage();
 			return null;
+		}
+	}
+
+	public void viewMenu() {
+		if (!menu.isEmpty()) {
+			menuMaintenanceUI.viewMenuItems(getMenuItems());
+		} else {
+			menuMaintenanceUI.displayEmptyMenuMessage();
 		}
 	}
 
