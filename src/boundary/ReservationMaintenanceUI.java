@@ -22,10 +22,11 @@ public class ReservationMaintenanceUI {
                 System.out.println("--- Reservation Management ---");
                 System.out.println("1. Make a Reservation");
                 System.out.println("2. View Reservations");
-                System.out.println("3. Update Reservation");
-                System.out.println("4. Cancel Reservation");
-                System.out.println("5. Exit");
-                System.out.print("Enter Your Choice (1-5) >> ");
+                System.out.println("3. Timeline View (Table Availability)");
+                System.out.println("4. Update Reservation");
+                System.out.println("5. Cancel Reservation");
+                System.out.println("6. Exit");
+                System.out.print("Enter Your Choice (1-6) >> ");
                 choice = scanner.nextInt();
                 isExceptionFound = false;
             } catch (Exception ex) {
@@ -44,6 +45,12 @@ public class ReservationMaintenanceUI {
 
     public void displayReservations(String reservations) {
         System.out.println(reservations);
+    }
+
+    public void timelineView(String inputStr) {
+        System.out.println("=== Table Availability ===");
+        System.out.println();
+        System.out.println(inputStr);
     }
 
     public String inputReservationDate() {

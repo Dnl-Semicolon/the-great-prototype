@@ -76,4 +76,10 @@ public class MenuMaintenanceUI {
 		System.out.println("Entry  Name             Price");
 		System.out.println(menuItems);
 	}
+
+	public void viewMenuItems(String menuItems) {
+		System.out.println("--- Menu Items ---");
+		System.out.println(" ID    Name             Price");
+		System.out.println(menuItems);
+	}
 }
