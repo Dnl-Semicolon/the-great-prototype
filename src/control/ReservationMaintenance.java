@@ -1,225 +1,282 @@
 package control;
 
-import adt.ArrayList;
-import adt.ListInterface;
+import adt.*;
 import boundary.ReservationMaintenanceUI;
 import dao.ReservationDAO;
 import entity.Reservation;
-import entity.Table;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 
 public class ReservationMaintenance {
-    private ReservationMaintenanceUI reservationMaintenanceUI;
-    private ReservationDAO reservationDAO;
-    private ListInterface<Reservation> reservationList = new ArrayList<>();
-    private static final String OPENING_TIME = "10:00 AM";
-    private static final String CLOSING_TIME = "10:00 PM";
-    private static final int TIME_INTERVAL = 30; // In minutes
+    private ReservationMaintenanceUI reservationMaintenanceUI = new ReservationMaintenanceUI();
+    private ReservationDAO reservationDAO = new ReservationDAO();
+    private int operatingHoursStart;
+    private int operatingHoursEnd;
     private TableMaintenance tableMaintenance;
+    private int tables;
+    private ListInterface<Reservation> reservations = new ArrayList<>();
+    private int lastId;
 
-    public ReservationMaintenance() {
-        reservationMaintenanceUI = new ReservationMaintenanceUI();
-        reservationDAO = new ReservationDAO();
-//        reservationList = reservationDAO.retrieveFromFile();
+    public ReservationMaintenance(int operatingHoursStart, int operatingHoursEnd) {
+        this.operatingHoursStart = operatingHoursStart;
+        this.operatingHoursEnd = operatingHoursEnd;
         tableMaintenance = new TableMaintenance();
+        tables = tableMaintenance.getListOfTables().getNumberOfEntries();
+        reservations = reservationDAO.retrieveFromFile();
+        lastId = 1000;
     }
 
-    public void timelineView() {
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("hh:mm a");
-        LocalTime openingTime = LocalTime.parse(OPENING_TIME, timeFormatter);
-        LocalTime closingTime = LocalTime.parse(CLOSING_TIME, timeFormatter);
+    public LocalDate getTomorrowDate() {
+        return LocalDate.now().plusDays(1);
+    }
 
-        ListInterface<String> timeSlots = new ArrayList<>();
-        LocalTime currentTime = openingTime;
-
-        while (!currentTime.isAfter(closingTime)) {
-            timeSlots.add(currentTime.format(timeFormatter));
-            currentTime = currentTime.plusMinutes(TIME_INTERVAL);
+    public ListInterface<String> timeSlots() {
+        ListInterface<String> slots = new ArrayList<>();
+        for (int h = operatingHoursStart; h < operatingHoursEnd; h++) {
+            slots.add(String.format("%02d:00", h));
         }
+        return slots;
+    }
 
-        StringBuilder table = new StringBuilder();
-        table.append("Table   | ");
-        String slot;
-        int n = timeSlots.getNumberOfEntries();
-        for (int i = 1; i <= n; i++) {
+    public String parseTime(String timeInput) {
+        try {
+            timeInput = timeInput.trim().toUpperCase();
+            String[] parts = timeInput.split(" ");
+            if (parts.length != 2) return null;
+            String timePart = parts[0];
+            String ampm = parts[1];
+
+            String[] hhmm = timePart.split(":");
+            if (hhmm.length != 2) return null;
+
+            int hour = Integer.parseInt(hhmm[0]);
+            int minute = Integer.parseInt(hhmm[1]);
+            if (minute != 0) return null;
+
+            if (!ampm.equals("AM") && !ampm.equals("PM")) return null;
+
+            if (ampm.equals("PM") && hour != 12) {
+                hour += 12;
+            } else if (ampm.equals("AM") && hour == 12) {
+                hour = 0;
+            }
+
+            if (hour < operatingHoursStart || hour >= operatingHoursEnd) return null;
+
+            return String.format("%02d:%02d", hour, minute);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    public int checkAvailability(LocalDate date, String timeSlot) {
+        int count = 0;
+        for (int i = 1; i <= reservations.getNumberOfEntries(); i++) {
+            Reservation r = reservations.getEntry(i);
+            if (r.getDate().equals(date) && r.getTimeSlot().equals(timeSlot)) {
+                count++;
+            }
+        }
+        return tables - count;
+    }
+
+    public void viewAvailability() {
+        LocalDate date = getTomorrowDate();
+        System.out.println("Time Slots for " + date.format(DateTimeFormatter.ofPattern("MMMM d, yyyy")) + ":");
+        ListInterface<String> timeSlots = timeSlots();
+        String slot = "";
+        for (int i = 1; i <= timeSlots.getNumberOfEntries(); i++) {
             slot = timeSlots.getEntry(i);
-            table.append(String.format("%-9s| ", slot));
+            int available = checkAvailability(date, slot);
+            System.out.println(format24to12(slot) + " - Available Tables: " + available);
         }
-        table.append("\n");
-        table.append("-".repeat(9 + (n * 11))).append("\n");
-
-        reservationMaintenanceUI.timelineView(table.toString());
+        System.out.print("\nPress ENTER to return to main menu...");
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine();
     }
 
-    public void displayReservations() {
-        if (!reservationList.isEmpty()) {
-            reservationMaintenanceUI.displayReservations(getReservations());
-        } else {
-            reservationMaintenanceUI.displayEmptyReservationListMessage();
+    private Integer findFreeTable(LocalDate date, String timeSlot) {
+        ListInterface<Integer> used = new ArrayList<>();
+        for (int i = 1; i <= reservations.getNumberOfEntries(); i++) {
+            Reservation r = reservations.getEntry(i);
+            if (r.getDate().equals(date) && r.getTimeSlot().equals(timeSlot)) {
+                used.add(r.getReservedTableNumber());
+            }
         }
+
+        for (int i = 1; i <= tables; i++) {
+            if (!used.contains(i)) return i;
+        }
+        return null;
     }
 
-    public String getReservations() {
-        return "";
+    public String generateReservationId() {
+        lastId++;
+        return "R" + lastId;
     }
 
     public void makeReservation() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter Customer Name: ");
-        String name = scanner.nextLine();
-
-        System.out.print("Enter Phone Number: ");
-        String phone = scanner.nextLine();
-
-        System.out.print("Enter Number of Guests: ");
-        int partySize = scanner.nextInt();
-        scanner.nextLine();
-
-        ListInterface<Table> tables = tableMaintenance.getListOfTables();
-
-        if (tables.isEmpty()) {
-            System.out.println("Sorry, no tables available for your party size.");
-            return;
-        }
-        Table availableTable;
-        System.out.println("\nAvailable Tables:");
-        for (int i = 1; i <= tables.getNumberOfEntries(); i++) {
-            availableTable = tables.getEntry(i);
-            System.out.printf("Table %d (Capacity: %d)\n",
-                    availableTable.getTableNo(), availableTable.getCapacity());
-        }
-
-        System.out.print("\nEnter Reservation Date and Time (YYYY-MM-DD HH:mm): ");
-        String dateTimeStr = scanner.nextLine();
-        LocalDateTime reservationTime;
+        System.out.print("Enter customer name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Enter part size (1-4): ");
+        int partySize;
         try {
-            reservationTime = LocalDateTime.parse(dateTimeStr,
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        } catch (Exception e) {
-            System.out.println("Invalid date format. Reservation cancelled.");
+            partySize = Integer.parseInt(scanner.nextLine().trim());
+        } catch (Exception ex) {
+            System.out.println("Invalid party size.");
+            System.out.print("Press ENTER to continue...");
+            scanner.nextLine();
+            return;
+        }
+        System.out.print("Enter reservation time (HH:MM AM/PM) for " + getTomorrowDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")) + ": ");
+        String timeInput = scanner.nextLine();
+        String timeSlot = parseTime(timeInput);
+        if (timeSlot == null) {
+            System.out.println("Invalid time or time out of operating hours.");
+            System.out.println();
+            System.out.print("Press ENTER to continue...");
+            scanner.nextLine();
             return;
         }
 
-        // Select a table
-        System.out.print("Enter Table Number: ");
-        int tableNumber = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
-
-        Table selectedTable = null;
-        boolean found = false;
-        int n = tables.getNumberOfEntries();
-        for (int i = 1; i <= n && !found; i++) {
-            selectedTable = tables.getEntry(i);
-            if (selectedTable.getTableNo() == tableNumber) {
-                found = true;
-            }
-        }
-
-        if (!found) {
-            selectedTable = null;
-        }
-
-        if (selectedTable == null) {
-            System.out.println("Invalid table selection. Reservation cancelled.");
+        Reservation added = addReservation(name, partySize, getTomorrowDate(), timeSlot);
+        if (added == null) {
+            System.out.print("Press ENTER to continue...");
+            scanner.nextLine();
             return;
         }
-
-
+        System.out.println("Reservation created successfully!");
+        System.out.println(added);
+        System.out.print("Press ENTER to continue...");
+        scanner.nextLine();
     }
 
-    public void addReservation() {
-        String dateInput = "";
-        String timeInput = "";
-
-        boolean isValidInput = false;
-        while (!isValidInput) {
-            dateInput = reservationMaintenanceUI.inputReservationDate();
-            if (isValidReservationDate(dateInput)) {
-                isValidInput = true;
-            }
+    public Reservation addReservation(String customerName, int partySize, LocalDate date, String timeSlot) {
+        if (partySize < 1 || partySize > 4) {
+            System.out.println("Error: Party size must be between 1 and 4.");
+            return null;
         }
 
-        isValidInput = false;
-        while (!isValidInput) {
-            timeInput = reservationMaintenanceUI.inputReservationTime();
-            if (isValidReservationTime(timeInput)) {
-                isValidInput = true;
-            }
+        if (!date.equals(getTomorrowDate())) {
+            System.out.println("Error: Reservations must be made exactly one day in advance.");
+            return null;
         }
 
-        System.out.println("Available Tables for 20/12/2024 at 18:30:");
+        int available = checkAvailability(date, timeSlot);
+        if (available == 0) {
+            System.out.println("Error: No tables available at that time.");
+            return null;
+        }
 
+        Integer tableNum = findFreeTable(date, timeSlot);
+        if (tableNum == null) {
+            System.out.println("Error: No tables available at that time.");
+            return null;
+        }
+
+        String rid = generateReservationId();
+        Reservation r = new Reservation(rid, customerName, partySize, date, timeSlot, tableNum);
+        reservations.add(r);
+        reservationDAO.saveToFile(reservations);
+        return r;
     }
 
-    private void runReservationMaintenance() {
+    private Reservation findReservationById(String reservationId) {
+        for (int i = 1; i <= reservations.getNumberOfEntries(); i++) {
+            Reservation r = reservations.getEntry(i);
+            if (r.getReservationId().equals(reservationId)) {
+                return r;
+            }
+        }
+        return null;
+    }
+
+    public ListInterface<Reservation> listReservations() {
+        return reservations;
+    }
+
+    public void displayReservations() {
+        ListInterface<Reservation> allRes = listReservations();
+        if (allRes.isEmpty()) {
+            System.out.println("No upcoming reservations.");
+            System.out.println();
+        } else {
+            System.out.println("Upcoming Reservations for " + getTomorrowDate().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")) + ":");
+            System.out.println("-------------------------------------------------");
+            for (int i = 1; i <= allRes.getNumberOfEntries(); i++) {
+                Reservation r = allRes.getEntry(i);
+                System.out.println(r);
+                System.out.println("-------------------------------------------------");
+            }
+        }
+    }
+
+    private String format24to12(String slot) {
+        String[] parts = slot.split(":");
+        int hour = Integer.parseInt(parts[0]);
+        int minute = Integer.parseInt(parts[1]);
+        String ampm = "AM";
+        int hour12 = hour;
+        if (hour == 0) {
+            hour12 = 12;
+        } else if (hour == 12) {
+            ampm = "PM";
+        } else if (hour > 12) {
+            hour12 = hour - 12;
+            ampm = "PM";
+        }
+        return String.format("%d:%02d %s", hour12, minute, ampm);
+    }
+
+    public void runReservationMaintenance() {
         int choice = 0;
         do {
-            choice = reservationMaintenanceUI.getMainMenuChoice();
+            choice = getMainMenuChoice();
             switch (choice) {
                 case 1:
-                    makeReservation();
+                    viewAvailability();
                     break;
                 case 2:
-                    displayReservations();
-                    break;
-                case 3:
-                    timelineView();
-                    break;
-                case 4:
+                    makeReservation();
                     break;
                 case 5:
-                    System.out.println("Exiting system");
+                    displayReservations();
+                    break;
+                case 6:
+                    System.out.println("Exiting");
                     System.out.println();
                     break;
                 default:
-                    System.out.println("Error: Not A Valid Choice. Enter A Choice Within 1-5.");
+                    System.out.println("Invalid Choice.");
                     System.out.println();
             }
-        } while (choice != 5);
-    }
-
-    public static boolean isValidReservationDate(String dateInputStr) {
-        if (dateInputStr == null || !dateInputStr.matches("\\d{2}/\\d{2}/\\d{4}")) {
-            return false;
-        }
-        try {
-            LocalDate inputDate = LocalDate.parse(dateInputStr, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-
-            LocalDate today = LocalDate.now(); // Get today's date
-            LocalDate tomorrow = today.plusDays(1); // Get tomorrow's date
-
-            return inputDate.isEqual(tomorrow);
-
-        } catch (DateTimeParseException e) {
-            return false;
-        }
-    }
-
-    public boolean isValidReservationTime(String timeInput) {
-        if (timeInput == null || !timeInput.matches("([01]\\d|2[0-3]):[0-5]\\d")) {
-            return false;
-        }
-
-        try {
-            LocalTime inputTime = LocalTime.parse(timeInput, DateTimeFormatter.ofPattern("HH:mm"));
-            // Define business hours (8:00 AM to 10:00 PM)
-            LocalTime openingTime = LocalTime.of(8, 0);
-            LocalTime closingTime = LocalTime.of(22, 0);
-
-            // Check if the input time is within business hours
-            return !inputTime.isBefore(openingTime) && !inputTime.isAfter(closingTime);
-        } catch (DateTimeParseException e) {
-            return false;
-        }
+        } while (choice != 6);
     }
 
     public static void main(String[] args) {
-        ReservationMaintenance reservationMaintenance = new ReservationMaintenance();
+        ReservationMaintenance reservationMaintenance = new ReservationMaintenance(10, 22);
         reservationMaintenance.runReservationMaintenance();
+    }
+
+    public int getMainMenuChoice() {
+        Scanner scanner = new Scanner(System.in);
+        int choice = 0;
+        System.out.println("=======================================");
+        System.out.println("Welcome to the Restaurant Reservation");
+        System.out.println("(Current Date: " + LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")) + ")");
+        System.out.println("Reservations can only be made for " + getTomorrowDate().format(DateTimeFormatter.ofPattern("MMMM d, yyyy")));
+        System.out.println("=======================================");
+        System.out.println("1. View Availability");
+        System.out.println("2. Add Reservation");
+        System.out.println("3. Modify Reservation");
+        System.out.println("4. Cancel Reservation");
+        System.out.println("5. List All Reservations");
+        System.out.println("6. Exit");
+        System.out.print("Enter Your Choice (1-6) >> ");
+        choice = scanner.nextInt();
+        scanner.nextLine();
+        return choice;
     }
 }
