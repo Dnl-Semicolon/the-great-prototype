@@ -1,14 +1,20 @@
 package entity;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Reservation implements Serializable {
     private LocalDateTime reservationDateTime;
+    private LocalDate date;
+    private String timeSlot;
     private String lastName;
     private int partySize;
     private String contactNumber;
     private int reservedTableNumber;
+    private String reservationId;
 
     public Reservation() {
     }
@@ -19,6 +25,16 @@ public class Reservation implements Serializable {
         this.partySize = partySize;
         this.contactNumber = contactNumber;
         this.reservedTableNumber = reservedTableNumber;
+    }
+
+    public Reservation(String reservationId, String lastName, int partySize, LocalDate date, String timeSlot, int reservedTableNumber) {
+        this.reservationDateTime = null;
+        this.lastName = lastName;
+        this.partySize = partySize;
+        this.date = date;
+        this.timeSlot = timeSlot;
+        this.reservedTableNumber = reservedTableNumber;
+        this.reservationId = reservationId;
     }
 
     public LocalDateTime getReservationDateTime() {
@@ -61,6 +77,22 @@ public class Reservation implements Serializable {
         this.reservedTableNumber = reservedTableNumber;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getTimeSlot() {
+        return timeSlot;
+    }
+
+    public void setTimeSlot(String timeSlot) {
+        this.timeSlot = timeSlot;
+    }
+
     public boolean isTimeToReserve() {
         LocalDateTime now = LocalDateTime.now();
         return now.isAfter(reservationDateTime.minusHours(1)) && now.isBefore(reservationDateTime);
@@ -68,12 +100,20 @@ public class Reservation implements Serializable {
 
     @Override
     public String toString() {
-        return "Reservation{" +
-                "reservationDateTime=" + reservationDateTime +
-                ", lastName='" + lastName + '\'' +
-                ", partySize=" + partySize +
-                ", contactNumber='" + contactNumber + '\'' +
-                ", reservedTableNumber=" + reservedTableNumber +
-                '}';
+        StringBuilder outputStr = new StringBuilder();
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+        outputStr.append(String.format("Customer: %s\n", this.lastName));
+        outputStr.append("Date & Time: " + date.format(format) + " " + timeSlot + "\n");
+        outputStr.append(String.format("Table: #%d\n", this.reservedTableNumber));
+        outputStr.append(String.format("Party Size: %d", this.partySize));
+        return outputStr.toString();
+    }
+
+    public String getReservationId() {
+        return reservationId;
+    }
+
+    public void setReservationId(String reservationId) {
+        this.reservationId = reservationId;
     }
 }

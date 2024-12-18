@@ -17,11 +17,6 @@ public class ReservationsUI {
         System.out.println("=======================================");
         return choice;
     }
-
-    public static void main(String[] args) {
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("M d, yyyy");
-
-    }
 }/*
 
 =======================================
