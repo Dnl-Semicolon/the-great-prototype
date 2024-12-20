@@ -17,8 +17,8 @@ public class CreateOrder {
 
     public CreateOrder() {
         createOrderUI = new CreateOrderUI();
-        menuMaintenance = new MenuMaintenance();
-        tableMaintenance = new TableMaintenance();
+        menuMaintenance = MenuMaintenance.getInstance();
+        tableMaintenance = TableMaintenance.getInstance();
         table = new Table();
         order = new Order();
     }

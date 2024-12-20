@@ -1,14 +1,20 @@
 package entity;
 
+import adt.ListInterface;
+import boundary.ReceiptUI;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
  *
- * @author 
+ * @author Choo Zheng Yi
  */
 
 public class Receipt {
+    private int tableNo;
+    private String cLastName;
+    private String cContactNo;
     private double subtotal;
     private int tax;
     private int discount;
@@ -17,11 +23,17 @@ public class Receipt {
     private LocalDateTime timeNow;
     private int receiptNo;
     
+    private ListInterface<Bill> items;
+    
     public Receipt(){
         this.timeNow = LocalDateTime.now();
     }
     
-    public Receipt(double subtotal, int tax, int discount, int serviceCharge, double grandTotal, LocalDateTime timeNow, int receiptNo){
+    public Receipt(int tableNo, String cLastName, String cContactNo, 
+            double subtotal, int tax, int discount, int serviceCharge, double grandTotal, LocalDateTime timeNow, int receiptNo){
+        this.tableNo = tableNo;
+        this.cLastName = cLastName;
+        this.cContactNo = cContactNo;
         this.subtotal = subtotal;
         this.tax = tax;
         this.discount = discount;
@@ -29,6 +41,38 @@ public class Receipt {
         this.grandTotal = grandTotal;
         this.timeNow = timeNow;
         this.receiptNo = receiptNo;
+    }
+    
+    public void setItems(ListInterface<Bill> items) {
+        this.items = items;
+    }
+    
+    public ListInterface<Bill> getItems() {
+        return items;
+    }
+    
+    public int getTableNo(){
+        return tableNo;
+    }
+    
+    public void setTableNo(int tableNo){
+        this.tableNo = tableNo;
+    }
+    
+    public String getCLastName(){
+        return cLastName;
+    }
+    
+    public void setCLastName(String cLastName){
+        this.cLastName = cLastName;
+    }
+    
+    public String getCContactNo(){
+        return cContactNo;
+    }
+    
+    public void setCContactNo(String cContactNo){
+        this.cContactNo = cContactNo;
     }
     
     public double getSubtotal(){
@@ -94,18 +138,9 @@ public class Receipt {
     
     @Override
     public String toString() {
-        return String.format(
-            "%-38s  RM%6.2f\n" + 
-            "%-44s  %1d%%\n" +    
-            "%-43s  %2d%%\n" +    
-            "%-43s  %2d%%\n" +    
-            "------------------------------------------------\n" +
-            "%-39s RM%6.2f",    
-            "SUBTOTAL:", subtotal,
-            "TAX:", tax,
-            "DISCOUNT:", discount,
-            "SERVICE CHARGES:", serviceCharge,
-            "GRAND TOTAL:", grandTotal
-        );     
+   
+        ReceiptUI receiptUI = new ReceiptUI();
+        return receiptUI.printReceipt();
     }
+
 }

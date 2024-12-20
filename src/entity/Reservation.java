@@ -37,6 +37,34 @@ public class Reservation implements Serializable {
         this.reservationId = reservationId;
     }
 
+    public boolean isReserveTime() {
+        LocalTime reservationTime = parseTime();
+        if (reservationTime == null) {
+            return false;
+        }
+        if (!date.equals(LocalDate.now())) {
+            return false;
+        }
+
+        LocalTime now = LocalTime.now();
+
+        // Calculate 15 minutes before and after the reservation time
+        LocalTime fifteenBefore = reservationTime.minusMinutes(15);
+        LocalTime fifteenAfter = reservationTime.plusMinutes(15);
+
+        // Return true if current time is within [reservationTime - 15 minutes, reservationTime + 15 minutes]
+        return !now.isBefore(fifteenBefore) && !now.isAfter(fifteenAfter);
+    }
+
+    public LocalTime parseTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        try {
+            return LocalTime.parse(timeSlot, formatter);
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     public LocalDateTime getReservationDateTime() {
         return reservationDateTime;
     }

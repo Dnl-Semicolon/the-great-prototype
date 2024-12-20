@@ -2,20 +2,40 @@ package control;
 
 import adt.ArrayList;
 import adt.ListInterface;
+import adt.MapInterface;
 import boundary.MenuMaintenanceUI;
 import dao.MenuDAO;
+import entity.Ingredient;
 import entity.MenuItem;
 import java.util.Scanner;
 
 public class MenuMaintenance {
+
+	private static MenuMaintenance singletonInstance;
+
 	private MenuMaintenanceUI menuMaintenanceUI;
 	private MenuDAO menuDAO;
 	private ListInterface<MenuItem> menu;
+	private MenuItem selectedMenuItem;
 
-	public MenuMaintenance() {
+	private ListInterface<Ingredient> productList;
+	private MapInterface<String, Ingredient> ingredientMap;
+
+
+	private MenuMaintenance() {
 		menuMaintenanceUI = new MenuMaintenanceUI();
-		menuDAO = new MenuDAO();
+		menuDAO = MenuDAO.getInstance();
 		menu = menuDAO.retrieveFromFile();
+		selectedMenuItem = null;
+		productList = InventoryManager.getInstance().getProductList();
+		ingredientMap = InventoryManager.getInstance().getIngredientMap();
+	}
+
+	public static MenuMaintenance getInstance() {
+		if (singletonInstance == null) {
+			singletonInstance = new MenuMaintenance();
+		}
+		return singletonInstance;
 	}
 
 	public ListInterface<MenuItem> getMenuList() {
@@ -84,8 +104,10 @@ public class MenuMaintenance {
 		Scanner scanner = new Scanner(System.in);
 		if (!menu.isEmpty()) {
 			while (true) {
+				displayMenu();
 				System.out.println("Search Menu Items");
 				System.out.println("Enter a keyword to filter menu items (or type 'exit' to return to the main menu):");
+				System.out.print("> ");
 				keyword = scanner.nextLine().trim();
 				System.out.println();
 
@@ -210,6 +232,281 @@ public class MenuMaintenance {
 
 	}
 
+	public void searchMenuItemOrRecipeUpdate() {
+		this.selectedMenuItem = searchMenuItem();
+		if (this.selectedMenuItem == null) {
+			System.out.println("Returning to Main Menu");
+			System.out.println();
+			return;
+		}
+		viewRecipe();
+		if (selectedMenuItem.getRecipe().isEmpty()) {
+			System.out.println("This item currently has no associated recipe and cannot be ordered until a recipe is added.");
+			System.out.println();
+			addRecipeChoice();
+		} else {
+			recipeUpdateChoice();
+		}
+	}
+
+	private void viewRecipe() {
+		String recipeStr = this.selectedMenuItem.printRecipe();
+		System.out.println("Current Recipe: " + recipeStr);
+		System.out.println();
+	}
+
+	public void showRecipe(MenuItem selectMenuItem) {
+		String recipeStr = selectMenuItem.printRecipe();
+		System.out.println("Current Recipe: " + recipeStr);
+		System.out.println();
+	}
+
+	private void addRecipeChoice() {
+		int choice = 0;
+		boolean moveToUpdateMenu = false;
+		do {
+			if (!selectedMenuItem.getRecipe().isEmpty()) {
+				moveToUpdateMenu = true;
+				break;
+			}
+			choice = getAddRecipeChoice();
+			switch (choice) {
+				case 1:
+					addIngredientToRecipe();
+					break;
+				case 2:
+					addMultipleIngredientsToRecipe();
+					break;
+				case 3:
+					System.out.println("Returning to Main Menu.");
+					System.out.println();
+					break;
+				default:
+					System.out.println("Error: Not A Valid Choice. Enter A Choice Within 1-2.");
+					System.out.println();
+			}
+		} while (choice != 3);
+		if (moveToUpdateMenu) {
+			recipeUpdateChoice();
+		}
+	}
+
+	private void recipeUpdateChoice() {
+		Scanner scanner = new Scanner(System.in);
+		int choice = 0;
+		do {
+			choice = getRecipeUpdateChoice();
+			switch (choice) {
+				case 1:
+					viewRecipe();
+					System.out.print("Press ENTER to continue");
+					scanner.nextLine();
+					System.out.println();
+					break;
+				case 2:
+					addIngredientToRecipe();
+					break;
+				case 3:
+					addMultipleIngredientsToRecipe();
+					break;
+				case 4:
+					removeIngredientFromRecipe();
+					break;
+				case 5:
+					System.out.println("Returning to Main Menu.");
+					System.out.println();
+					break;
+				default:
+					System.out.println("Error: Not A Valid Choice. Enter A Choice Within 1-4.");
+					System.out.println();
+			}
+		} while (choice != 5);
+	}
+
+	private void addIngredientToRecipe() {
+		Scanner scanner = new Scanner(System.in);
+		ListInterface<Ingredient> recipe = selectedMenuItem.getRecipe();
+		// Assuming you have:
+		// Map<String, Ingredient> ingredientMap
+		// List<Ingredient> recipe
+		// Scanner scanner
+		// String menuItemName - the name of the current menu item you are editing
+
+		String display = "";
+		for (int i = 1; i <= productList.getNumberOfEntries(); i++) {
+			display += productList.getEntry(i) + "\n";
+		}
+		System.out.println("List of Products:\n" + display);
+
+		System.out.print("Enter Ingredient Code to Add: ");
+		String codeToAdd = scanner.nextLine().trim();
+		System.out.println();
+		// Check if the ingredient code exists in the map
+		if (!ingredientMap.containsKey(codeToAdd)) {
+			System.out.println("No ingredient found with code " + codeToAdd + ".");
+			System.out.println();
+		} else {
+			// Ingredient found, get its details
+			Ingredient ing = ingredientMap.get(codeToAdd);
+			System.out.print("Ingredient '" + ing.getName() + "' found. Add to recipe? (y/n): ");
+			String confirmation = scanner.nextLine().trim().toLowerCase();
+			System.out.println();
+
+			if (confirmation.equals("y")) {
+				// Check if ingredient is already in the recipe to avoid duplicates if needed
+				if (recipe.contains(ing)) {
+					System.out.println("This ingredient is already in the recipe.");
+				} else {
+					recipe.add(ing);
+					System.out.println(ing.getName() + " added to " + selectedMenuItem.getName() + " recipe.");
+					menuDAO.saveToFile(menu);
+					System.out.println();
+				}
+			} else {
+				System.out.println("Addition canceled.");
+			}
+		}
+
+	}
+
+	private void addMultipleIngredientsToRecipe() {
+		Scanner scanner = new Scanner(System.in);
+		ListInterface<Ingredient> recipe = selectedMenuItem.getRecipe();
+		// Assuming:
+		// Map<String, Ingredient> ingredientMap
+		// ListInterface<Ingredient> productList (or some list of products)
+		// Scanner scanner
+		// String menuItemName - the name of the current menu item
+
+		// Display all available products to the user
+		StringBuilder display = new StringBuilder();
+		for (int i = 1; i <= productList.getNumberOfEntries(); i++) {
+			display.append(productList.getEntry(i)).append("\n");
+		}
+		System.out.println("List of Products:\n" + display);
+
+		System.out.println("Enter multiple Ingredient Codes separated by a comma (e.g. ING1,ING2,ING3):");
+		System.out.print("Ingredient Codes: ");
+		String line = scanner.nextLine().trim();
+
+		// Split by comma
+		String[] codesToAdd = line.split(",");
+
+		// Keep track of successes and failures for reporting at the end
+		int addedCount = 0;
+		ListInterface<String> alreadyInRecipe = new ArrayList<>();
+		ListInterface<String> notFound = new ArrayList<>();
+
+		for (String code : codesToAdd) {
+			String trimmedCode = code.trim();
+
+			if (!ingredientMap.containsKey(trimmedCode)) {
+				// Ingredient not found
+				notFound.add(trimmedCode);
+			} else {
+				// Ingredient found
+				Ingredient ing = ingredientMap.get(trimmedCode);
+				if (recipe.contains(ing)) {
+					// Ingredient already in the recipe
+					alreadyInRecipe.add(ing.getName());
+				} else {
+					// Confirm addition
+					System.out.println();
+					System.out.print("Ingredient '" + ing.getName() + "' found. Add to recipe? (y/n): ");
+					String confirmation = scanner.nextLine().trim().toLowerCase();
+					System.out.println();
+
+					if (confirmation.equals("y")) {
+						recipe.add(ing);
+						addedCount++;
+						System.out.println(ing.getName() + " added to " + selectedMenuItem.getName() + " recipe.");
+					} else {
+						System.out.println("Addition canceled for " + ing.getName() + ".");
+					}
+				}
+			}
+		}
+
+		// After processing all codes:
+		menuDAO.saveToFile(menu);
+
+		// Provide a summary
+		System.out.println();
+		if (addedCount > 0) {
+			System.out.println(addedCount + " ingredient(s) successfully added.");
+		}
+		if (!alreadyInRecipe.isEmpty()) {
+			System.out.println("These ingredients were already in the recipe: " + String.join((CharSequence) ", ", (CharSequence) alreadyInRecipe));
+		}
+		if (!notFound.isEmpty()) {
+			System.out.println("No ingredient found with code(s): " + String.join((CharSequence) ", ", (CharSequence) notFound));
+		}
+
+		System.out.println("Process completed.\n");
+	}
+
+
+	private void removeIngredientFromRecipe() {
+	}
+
+	public int getRecipeUpdateChoice() {
+		Scanner scanner = new Scanner(System.in);
+		int choice = 0;
+		boolean isExceptionFound = false;
+		do {
+			try {
+				System.out.println("Currently Selected Menu Item: " + selectedMenuItem.getName());
+				System.out.println("--- Recipe Update Options ---");
+				System.out.println("1. View Recipe");
+				System.out.println("2. Add Ingredient to Recipe");
+				System.out.println("3. Add Multiple Ingredients to Recipe at once");
+				System.out.println("4. Remove Ingredient from Recipe");
+				System.out.println("5. Return to Main Menu");
+				System.out.print("Enter Your Choice >> ");
+				choice = scanner.nextInt();
+				isExceptionFound = false;
+			} catch (Exception ex) {
+				scanner.nextLine();
+				choice = 0;
+				isExceptionFound = true;
+				System.out.println();
+				System.out.println("Error: Not A Valid Choice. Enter A Whole Number As Your Choice.");
+				System.out.println();
+			}
+		} while (isExceptionFound);
+		scanner.nextLine();
+		System.out.println();
+		return choice;
+	}
+
+	public int getAddRecipeChoice() {
+		Scanner scanner = new Scanner(System.in);
+		int choice = 0;
+		boolean isExceptionFound = false;
+		do {
+			try {
+				System.out.println("Currently Selected Menu Item: " + selectedMenuItem.getName());
+				System.out.println("--- Recipe Update Options ---");
+				System.out.println("1. Add Ingredient to Recipe");
+				System.out.println("2. Add Multiple Ingredients to Recipe at once");
+				System.out.println("3. Return to Main Menu");
+				System.out.print("Enter Your Choice >> ");
+				choice = scanner.nextInt();
+				isExceptionFound = false;
+			} catch (Exception ex) {
+				scanner.nextLine();
+				choice = 0;
+				isExceptionFound = true;
+				System.out.println();
+				System.out.println("Error: Not A Valid Choice. Enter A Whole Number As Your Choice.");
+				System.out.println();
+			}
+		} while (isExceptionFound);
+		scanner.nextLine();
+		System.out.println();
+		return choice;
+	}
+
 	public void runMenuMaintenance() {
 		int choice = 0;
 		do {
@@ -223,7 +520,7 @@ public class MenuMaintenance {
 					displayMenu();
 					break;
 				case 3:
-					searchMenuItem();
+					searchMenuItemOrRecipeUpdate();
 					break;
 				case 4:
 					deleteMenuItem();

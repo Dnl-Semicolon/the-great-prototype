@@ -2,7 +2,9 @@ package entity;
 
 import adt.*;
 
-public class Order {
+import java.io.Serializable;
+
+public class Order implements Serializable {
 
     public int tableNo;
     public ListInterface<OrderItem> orderItems = new ArrayList<>();

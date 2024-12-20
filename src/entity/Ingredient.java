@@ -1,31 +1,43 @@
 package entity;
 
-public class Ingredient {
-    String name;
-    int quantity;
+import java.io.Serializable;
 
+public class Ingredient implements Serializable {
+    private String name;
+    private int currentStock;
+    private String code;
 
     public Ingredient() {
     }
 
-    public Ingredient(String name, int quantity) {
+    public Ingredient(String code, String name, int currentStock) {
         this.name = name;
-        this.quantity = quantity;
+        this.currentStock = currentStock;
+        this.code = code;
     }
 
-    public String getName() {
-        return name;
+    public Ingredient(String name, int currentStock) {
+        this("", name, currentStock);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void reduceStock(int quantityUsed) {
+        currentStock -= quantityUsed;
     }
 
-    public int getQuantity() {
-        return quantity;
+    public boolean isLowStock(int threshold) {
+        return currentStock <= threshold;
     }
 
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    @Override
+    public String toString() {
+        return String.format("Code: %-10s Name: %-20s Stock: %d", code, name, currentStock);
     }
+
+    // Getter and Setters
+    public String getName() {return name;}
+    public void setName(String name) {this.name = name;}
+    public int getCurrentStock() {return currentStock;}
+    public void setCurrentStock(int currentStock) {this.currentStock = currentStock;}
+    public String getCode() {return code;}
+    public void setCode(String code) {this.code = code;}
 }

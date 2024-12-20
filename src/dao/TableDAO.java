@@ -6,7 +6,19 @@ import entity.*;
 import java.io.*;
 
 public class TableDAO {
+
+    private static TableDAO singletonInstance;
+
     private String fileName = "tables.dat";
+
+    private TableDAO() {}
+
+    public static TableDAO getInstance() {
+        if (singletonInstance == null) {
+            singletonInstance = new TableDAO();
+        }
+        return singletonInstance;
+    }
 
     public void saveToFile(ListInterface<Table> tableList) {
         File file = new File(fileName);
@@ -30,22 +42,26 @@ public class TableDAO {
             oiStream.close();
         } catch (FileNotFoundException ex) {
             System.out.println("\nNo such file.");
+            tableList = initBackup();
         } catch (IOException ex) {
-            System.out.println("\nCannot read from file.");
+            System.out.println("\nCannot read from file. TABLE");
+            tableList = initBackup();
         } catch (ClassNotFoundException ex) {
             System.out.println("\nClass not found.");
+            tableList = initBackup();
         } finally {
             return tableList;
         }
     }
 
-    public ListInterface<Table> initTables() {
+    private ListInterface<Table> initBackup() {
         ListInterface<Table> tableList = new ArrayList<>();
         tableList.add(new Table(1));
         tableList.add(new Table(2));
         tableList.add(new Table(3));
+        tableList.add(new Table(4));
+        tableList.add(new Table(5));
+        saveToFile(tableList);
         return tableList;
     }
-
-
 }

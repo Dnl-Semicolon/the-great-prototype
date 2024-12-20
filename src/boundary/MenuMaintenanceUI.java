@@ -22,7 +22,7 @@ public class MenuMaintenanceUI {
 				System.out.println("--- Menu Maintenance ---");
 				System.out.println("1. Add Menu Item to Menu");
 				System.out.println("2. Display Menu Items");
-				System.out.println("3. Search Menu Item");
+				System.out.println("3. Search Menu Item (Update Recipes Here)");
 				System.out.println("4. Delete Menu Item");
 				System.out.println("5. Exit");
 				System.out.print("Enter Your Choice >> ");
@@ -73,13 +73,14 @@ public class MenuMaintenanceUI {
 	}
 
 	public void displayMenuItems(String menuItems) {
-		System.out.println("Entry  Name             Price");
+		System.out.println("--- Menu Items ---");
+		System.out.println("Entry  Name                   Price");
 		System.out.println(menuItems);
 	}
 
 	public void viewMenuItems(String menuItems) {
 		System.out.println("--- Menu Items ---");
-		System.out.println(" ID    Name             Price");
+		System.out.println(" ID    Name                   Price");
 		System.out.println(menuItems);
 	}
 }

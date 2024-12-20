@@ -27,7 +27,7 @@ public class ReservationManager {
             choice = reservationManagerUI.getSeatGuestChoice();
             switch (choice) {
                 case 1:
-                    seatGuestFromWaitlist();
+//                    seatGuestFromWaitlist();
                     break;
                 case 2:
                     break;
@@ -37,18 +37,19 @@ public class ReservationManager {
         } while (choice != 3);
     }
 
-    private void seatGuestFromWaitlist() {
-        reservationManagerUI.displayWaitlist(getWaitlist());
-        boolean confirmation = reservationManagerUI.getConfirmationToSeatGuestFromWaitlist(waitlist.getEntry(1));
-        int tableNumber;
-        if (confirmation) {
-            Customer customer = waitlist.remove(1);
-            tableNumber = reservationManagerUI.getTableNumberChoice(orderManager.getUnoccupiedTables());
-            Table chosenTable = orderManager.tables.getEntry(tableNumber);
-            chosenTable.customer = customer;
-            reservationManagerUI.displayConfirmedSeatingMessage(chosenTable);
-        }
-    }
+    //legacy
+//    private void seatGuestFromWaitlist() {
+//        reservationManagerUI.displayWaitlist(getWaitlist());
+//        boolean confirmation = reservationManagerUI.getConfirmationToSeatGuestFromWaitlist(waitlist.getEntry(1));
+//        int tableNumber;
+//        if (confirmation) {
+//            Customer customer = waitlist.remove(1);
+//            tableNumber = reservationManagerUI.getTableNumberChoice(orderManager.getUnoccupiedTables());
+//            Table chosenTable = orderManager.tables.getEntry(tableNumber);
+//            chosenTable.customer = customer;
+//            reservationManagerUI.displayConfirmedSeatingMessage(chosenTable);
+//        }
+//    }
 
     public void reservationManagement() {
         int choice = 0;

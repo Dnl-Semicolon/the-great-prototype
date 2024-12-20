@@ -1,61 +1,64 @@
 package entity;
 
 import adt.*;
-
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 public class Table implements Serializable {
+
+    private ListInterface<OrderItem> orderList;
 
     public int tableNo;
     public ListInterface<Order> orders;
     public Customer customer;
-    public Reservation reservation;
+    public ListInterface<Reservation> reservations;
+    private LocalDateTime occupiedUntil = null;
+    private String status;
 
     public Table() {
         this(0);
     }
 
     public Table(int tableNo) {
+        this.orderList = new ArrayList<>();
         this.tableNo = tableNo;
         orders = new ArrayList<>();
         customer = null;
-        reservation = null;
+        reservations = new ArrayList<>();
+        status = "[Empty]";
     }
 
-    public int getTableNo() {
-        return tableNo;
+    public void occupy(Customer customer) {
+        setCustomer(customer);
     }
 
-    public void setTableNo(int tableNo) {
-        this.tableNo = tableNo;
+    public void addReservation(Reservation r) {
+        reservations.add(r);
     }
 
-    public ListInterface<Order> getOrders() {
-        return orders;
+    public void updateStatus() {
+        if (customer != null) {
+            status = "[Occupied]";
+        }
+        if (!reservations.isEmpty()) {
+            for (int i = 1; i <= reservations.getNumberOfEntries(); i++) {
+                Reservation reservation = reservations.getEntry(i);
+                boolean isReserveTime = reservation.isReserveTime();
+                if (isReserveTime) {
+                    status = "[Reserved]";
+                    break;
+                }
+            }
+            if (!status.equals("[Reserved]")) {
+                status = "[Empty]";
+            }
+        } else {
+            status = "[Empty]";
+        }
     }
 
-    public void setOrders(ListInterface<Order> orders) {
-        this.orders = orders;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-
-    public Reservation getReservation() {
-        return reservation;
-    }
-
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
-    }
-
-    public static boolean isValidTableNumber(int tableNumber) {
-        return tableNumber > 0 && tableNumber <= 100;
+    public String getStatus() {
+        return status;
     }
 
     @Override
@@ -65,16 +68,17 @@ public class Table implements Serializable {
         String statusData = "";
         String remarksData = "None";
         if (this.customer == null) {
-            if (this.reservation == null) {
-                statusData = "[Empty]";
-                remarksData = "None";
-            } else if (this.reservation.isTimeToReserve()) {
-                statusData = "[Reserved]";
-                remarksData = "Reservation Time: ";
-            } else {
-                statusData = "[Empty]";
-                remarksData = "None";
-            }
+            statusData = "[Empty]";
+//            if (this.reservation == null) {
+//                statusData = "[Empty]";
+//                remarksData = "None";
+//            } else if (this.reservation.isTimeToReserve()) {
+//                statusData = "[Reserved]";
+//                remarksData = "Reservation Time: ";
+//            } else {
+//                statusData = "[Empty]";
+//                remarksData = "None";
+//            }
         } else {
             statusData = "[Occupied]";
             remarksData = "Session Started: ";
@@ -85,15 +89,31 @@ public class Table implements Serializable {
         return inputStr.toString();
     }
 
-    public int getCapacity() {
-        return 4;
+
+    // Getters and Setters
+    public int getTableNo() {return tableNo;}
+    public void setTableNo(int tableNo) {this.tableNo = tableNo;}
+    public ListInterface<Order> getOrders() {return orders;}
+    public void setOrders(ListInterface<Order> orders) {this.orders = orders;}
+    public Customer getCustomer() {return customer;}
+    public void setCustomer(Customer customer) {this.customer = customer;}
+    public ListInterface<Reservation> getReservations() {return reservations;}
+    public static boolean isValidTableNumber(int tableNumber) {return tableNumber > 0 && tableNumber <= 100;}
+
+    public ListInterface<OrderItem> getOrderList() {return orderList;}
+    public boolean addToOrderList(OrderItem newOrderItem) {
+        for (int i = 1; i <= orderList.getNumberOfEntries(); i++) {
+            OrderItem orderListItem = orderList.getEntry(i);
+            if (newOrderItem.equals(orderListItem)) {
+                orderListItem.addToQuantity(newOrderItem.getQuantity());
+                return true;
+            }
+        }
+
+        return orderList.add(newOrderItem);
     }
-    //+--------+----------+------------+----------------------------+
-    //| Entry  | Table    | Status     | Remarks                    |
-    //+--------+----------+------------+----------------------------+
-    //| 1      | Table 1  | [Empty]    | None                       |
-    //| 2      | Table 2  | [Reserved] | Reservation Time: 7:30 PM  |
-    //| 3      | Table 3  | [Occupied] | Session Started: 7:00 PM   |
-    //| 4      | Table 4  | [Empty]    | None                       |
-    //+--------+----------+------------+----------------------------+
+
+    public boolean isOrderListEmpty() {
+        return orderList.isEmpty();
+    }
 }

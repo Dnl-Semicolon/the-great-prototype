@@ -1,7 +1,9 @@
 package dao;
 
 import adt.ArrayList;
+import adt.LinkedQueue;
 import adt.ListInterface;
+import adt.QueueInterface;
 import entity.Customer;
 import entity.MenuItem;
 
@@ -10,7 +12,7 @@ import java.io.*;
 public class WaitlistDAO {
     private String fileName = "waitlist.dat";
 
-    public void saveToFile(ListInterface<Customer> waitList) {
+    public void saveToFile(QueueInterface<Customer> waitList) {
         File file = new File(fileName);
         try {
             ObjectOutputStream ooStream = new ObjectOutputStream(new FileOutputStream(file));
@@ -23,12 +25,12 @@ public class WaitlistDAO {
         }
     }
 
-    public ListInterface<Customer> retrieveFromFile() {
+    public QueueInterface<Customer> retrieveFromFile() {
         File file = new File(fileName);
-        ListInterface<Customer> waitList = new ArrayList<>();
+        QueueInterface<Customer> waitList = new LinkedQueue<>();
         try {
             ObjectInputStream oiStream = new ObjectInputStream(new FileInputStream(file));
-            waitList = (ArrayList<Customer>) (oiStream.readObject());
+            waitList = (LinkedQueue<Customer>) (oiStream.readObject());
             oiStream.close();
         } catch (FileNotFoundException ex) {
             System.out.println("\nNo such file.");

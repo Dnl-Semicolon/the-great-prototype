@@ -1,16 +1,20 @@
 package control;
 
 import adt.ArrayList;
+import adt.LinkedQueue;
 import adt.ListInterface;
+import adt.QueueInterface;
 import boundary.WaitlistMaintenanceUI;
 import dao.WaitlistDAO;
 import entity.Customer;
 import entity.MenuItem;
 
+import java.util.Iterator;
+
 public class WaitlistMaintenance {
     private WaitlistMaintenanceUI waitlistMaintenanceUI;
     private WaitlistDAO waitlistDAO;
-    private ListInterface<Customer> waitlist = new ArrayList<>();
+    private QueueInterface<Customer> waitlist = new LinkedQueue<>();
 
     public WaitlistMaintenance() {
         waitlistMaintenanceUI = new WaitlistMaintenanceUI();
@@ -18,21 +22,29 @@ public class WaitlistMaintenance {
         waitlist = waitlistDAO.retrieveFromFile();
     }
 
+    public QueueInterface<Customer> getWaitlistQueue() {
+        return waitlist;
+    }
+
     public void displayWaitlist() {
         if (!waitlist.isEmpty()) {
             waitlistMaintenanceUI.displayWaitlist(getWaitlist());
         } else {
-            waitlistMaintenanceUI.displayEmptyWaitlistMessage();
+            displayEmptyWaitlistMessage();
         }
+    }
+
+    public void displayEmptyWaitlistMessage() {
+        waitlistMaintenanceUI.displayEmptyWaitlistMessage();
     }
 
     public String getWaitlist() {
         StringBuilder inputStr = new StringBuilder();
+        Iterator<Customer> iterator = waitlist.getIterator();
         Customer customer;
-        int n = waitlist.getNumberOfEntries();
-        for (int i = 1; i <= n; i++) {
-            customer = waitlist.getEntry(i);
-            inputStr.append(String.format("%3d.   ", i));
+        while (iterator.hasNext()) {
+            customer = iterator.next();
+            inputStr.append(String.format("%3d.   ", customer));
             inputStr.append(customer.toString());
             inputStr.append("\n");
         }
@@ -76,7 +88,7 @@ public class WaitlistMaintenance {
         newCustomer.setPartySize(customerPartySize);
         newCustomer.setPhoneNumber(customerContactNumber);
 
-        waitlist.add(newCustomer);
+        waitlist.enqueue(newCustomer);
         waitlistDAO.saveToFile(waitlist);
 
         displayWaitlist();

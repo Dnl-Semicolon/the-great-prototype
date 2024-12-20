@@ -48,8 +48,40 @@ public class MenuItem implements Serializable {
         return price >= 0 && price <= 10000;
     }
 
+    public ListInterface<Ingredient> getRecipe() {return recipe;}
+    public void setRecipe(ListInterface<Ingredient> recipe) {this.recipe = recipe;}
+
+    public String printRecipe() {
+        if (recipe.isEmpty()) {
+            return "[No recipe]";
+        }
+        StringBuilder recipeStr = new StringBuilder();
+        recipeStr.append("[");
+
+        for (int i = 1; i <= recipe.getNumberOfEntries(); i++) {
+            Ingredient ing = recipe.getEntry(i);
+            recipeStr.append(recipe.getEntry(i).getName());
+            if (i < recipe.getNumberOfEntries()) {
+                recipeStr.append(", ");
+            }
+        }
+
+        recipeStr.append("]");
+        return recipeStr.toString();
+    }
+
+    public boolean canFulfillOrder(int requiredQuantity) {
+        for (int i = 1; i <= recipe.getNumberOfEntries(); i++) {
+            Ingredient ingredient = recipe.getEntry(i);
+            if (ingredient.getCurrentStock() < requiredQuantity) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public String toString() {
-        return String.format("%-15s %6.2f", name, price);
+        return String.format("%-21s %6.2f", name, price);
     }
 }

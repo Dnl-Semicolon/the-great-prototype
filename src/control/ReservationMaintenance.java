@@ -4,6 +4,8 @@ import adt.*;
 import boundary.ReservationMaintenanceUI;
 import dao.ReservationDAO;
 import entity.Reservation;
+import entity.Table;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
@@ -15,13 +17,13 @@ public class ReservationMaintenance {
     private int operatingHoursEnd;
     private TableMaintenance tableMaintenance;
     private int tables;
-    private ListInterface<Reservation> reservations = new ArrayList<>();
+    private ListInterface<Reservation> reservations;
     private int lastId;
 
     public ReservationMaintenance(int operatingHoursStart, int operatingHoursEnd) {
         this.operatingHoursStart = operatingHoursStart;
         this.operatingHoursEnd = operatingHoursEnd;
-        tableMaintenance = new TableMaintenance();
+        tableMaintenance = TableMaintenance.getInstance();
         tables = tableMaintenance.getListOfTables().getNumberOfEntries();
         reservations = reservationDAO.retrieveFromFile();
         lastId = 1000;
@@ -179,7 +181,15 @@ public class ReservationMaintenance {
         String rid = generateReservationId();
         Reservation r = new Reservation(rid, customerName, partySize, date, timeSlot, tableNum);
         reservations.add(r);
+        for (int i = 1; i <= tableMaintenance.getListOfTables().getNumberOfEntries(); i++) {
+            Table table = tableMaintenance.getListOfTables().getEntry(i);
+            if (table.getTableNo() == tableNum) {
+                table.addReservation(r);
+                break;
+            }
+        }
         reservationDAO.saveToFile(reservations);
+        tableMaintenance.save();
         return r;
     }
 

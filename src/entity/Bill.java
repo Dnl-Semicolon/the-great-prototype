@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author ZY
+ * @author Choo Zheng Yi
  */
 public class Bill implements Serializable{
     

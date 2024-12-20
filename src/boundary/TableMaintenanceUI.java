@@ -67,6 +67,7 @@ public class TableMaintenanceUI {
     }
 
     public void displayAllTables(String allTables) {
+        System.out.println("--- Available Tables ---");
         System.out.println("Entry  Table      Status       Remarks");
         System.out.println(allTables);
     }

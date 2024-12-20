@@ -18,11 +18,54 @@ public class OrderManagerUI {
         return choice;
     }
 
-//    public Order inputOrderDetails() {
-//        Order order = new Order();
-//
-//        return order;
-//    }
+    public int getMainMenuChoice() {
+        int choice = 0;
+        boolean isExceptionFound = false;
+        do {
+            try {
+                System.out.println("--- Order Management ---");
+                System.out.println("1. Place Order");
+                System.out.println("2. View Orders for a Table");
+                System.out.println("3. Cancel Order");
+                System.out.println("4. Back to Main Menu");
+                System.out.print("Enter your choice (1-4): ");
+                choice = scanner.nextInt();
+                isExceptionFound = false;
+            } catch (Exception ex) {
+                scanner.nextLine();
+                choice = 0;
+                isExceptionFound = true;
+                System.out.println();
+                System.out.println("Error: Not A Valid Choice. Enter A Whole Number As Your Choice.");
+                System.out.println();
+            }
+        } while (isExceptionFound);
+        scanner.nextLine();
+        System.out.println();
+        return choice;
+    }
+
+    public int getTableNumber() {
+        int tableNumber = 0;
+        boolean isExceptionFound = false;
+        do {
+            try {
+                System.out.print("Enter table number: ");
+                tableNumber = scanner.nextInt();
+                isExceptionFound = false;
+            } catch (Exception ex) {
+                scanner.nextLine();
+                tableNumber = 0;
+                isExceptionFound = true;
+                System.out.println();
+                System.out.println("Error: Invalid input. Enter A Whole Number As Table Number.");
+                System.out.println();
+            }
+        } while (isExceptionFound);
+        scanner.nextLine();
+        System.out.println();
+        return tableNumber;
+    }
 
     public int getTableChoice(String inputStr) {
         int choice = 0;
